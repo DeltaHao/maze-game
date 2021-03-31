@@ -33,6 +33,9 @@
     <ClCompile Include="view.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="maze.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game.h">
@@ -51,6 +54,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="itemWithPic.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="maze.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

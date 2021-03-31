@@ -1,6 +1,10 @@
 #include"interface.h"
 #include"view.h"
 #include"itemWithPic.h"
+#include"maze.h"
+
+#define DISPLAY_WIDTH 800
+#define MENU_WIDTH 100
 
 
 class Game: public GameInterface{
@@ -12,12 +16,12 @@ public:
 	POINT mousePos;//当前鼠标位置
 	POINT PreMousePos;//之前鼠标位置
 	
-
 	SDL_Rect menuArea;//菜单区域
 
 	SDL_Rect displayArea;//显示区域
 	ItemWithPic* backGround;//背景
 	Player* player;//小人
+	Maze* maze;
 
 	View* view;//视图
 

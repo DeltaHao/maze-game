@@ -1,13 +1,18 @@
 #pragma once
 #include"SDL.h"
+
+#define BLOCK_WIDTH 20
+#define BACKGROUND_WIDTH 1200
+#define BACKGROUND_HEIGHT 1000
 class ItemWithPic {
 public:
 	SDL_Texture* texture;
 	SDL_Rect* rect;
 	SDL_Rect* rectInTexture;
-	ItemWithPic() {
+	ItemWithPic(float x, float y, int w, int h) {
 		texture = NULL;
 		rect = new SDL_Rect;
+		*rect = { (int)x,(int)y ,w, h };
 		rectInTexture = new SDL_Rect;
 	}
 	~ItemWithPic() {
@@ -19,16 +24,25 @@ public:
 		delete rect;
 		delete rectInTexture;
 	}
-	void render(SDL_Renderer* renderer) {
+	virtual void render(SDL_Renderer* renderer) {
 		SDL_RenderCopy(renderer, texture, 0, rect);
 	}
+};
+
+class Block :public ItemWithPic {
+	int x;
+	int y; //在矩阵中的位置
 };
 
 class Player:public ItemWithPic {
 public:
 	int x;
 	int y; //在矩阵中的位置
-	Player(int x, int y):x(x),y(y) {}
+
+	Player(float x, float y, int w, int h): ItemWithPic(x, y, w, h){
+		this->x = 0;
+		this->y = 0;
+	}
 	void moveLeft() {
 		x -= 1;
 		rect->x -= rect->w;

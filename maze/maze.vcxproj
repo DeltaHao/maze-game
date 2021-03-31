@@ -22,6 +22,7 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="gameFrame.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="maze.cpp" />
     <ClCompile Include="sgfhelper.c" />
     <ClCompile Include="view.cpp" />
   </ItemGroup>
@@ -30,6 +31,7 @@
     <ClInclude Include="gameFrame.h" />
     <ClInclude Include="interface.h" />
     <ClInclude Include="itemWithPic.h" />
+    <ClInclude Include="maze.h" />
     <ClInclude Include="sgfhelper.h" />
     <ClInclude Include="view.h" />
   </ItemGroup>

@@ -3,23 +3,21 @@
 
 bool Game::init() {
 	title = "迷宫";
-	w = 900;
-	h = 800;
+	w = DISPLAY_WIDTH;
+	h = DISPLAY_WIDTH - MENU_WIDTH;
 	FPS = 30;
 	
 	mousePos = { -1 };
 	PreMousePos = { -1 };
 
-	menuArea = { w - 100, 0, 100, h };
+	menuArea = { 0, 0, MENU_WIDTH, h };
 
-	displayArea = { 0, 0, w - 100, h };
-	backGround = new ItemWithPic();
-	*backGround->rect = { 0, 0, 1200, 1200 };
-	player = new Player(0, 0);
-	*player->rect = { 0, 0, 20, 20 };
+	displayArea = { menuArea.w, 0, w - menuArea.w, h };
+	backGround = new ItemWithPic(0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
+	player = new Player(0, 0, BLOCK_WIDTH, BLOCK_WIDTH);
+	maze = new Maze(10, 10, backGround);
 
 	view = new View(displayArea.w, displayArea.h, backGround->rect->w, backGround->rect->h);
-	
 	
 	return true;
 }
@@ -42,6 +40,8 @@ bool Game::loadResource() {
 
 	Surf = IMG_Load("res\\image\\player.png");
 	player->texture = SDL_CreateTextureFromSurface(bufferRenderer, Surf);
+	Surf = IMG_Load("res\\image\\block.png");
+	maze->texture = SDL_CreateTextureFromSurface(bufferRenderer, Surf);
 
 	SDL_FreeSurface(Surf);
 
@@ -126,15 +126,14 @@ void Game::update(){
 
 void Game::render(SDL_Window*, SDL_Renderer* renderer){
 	//把图片绘制到内存缓冲区
-	backGround->render(bufferRenderer);
-	//SDL_RenderCopy(bufferRenderer, backGround->texture, 0, 0);//背景
+	backGround->render(bufferRenderer);//背景
 	player->render(bufferRenderer);//小人
-
+	maze->render(bufferRenderer);
 	
 
 	//创建缓冲区纹理
 	SDL_Texture* bufferTex = SDL_CreateTextureFromSurface(renderer,bufferSurf);
-	view->transform(displayArea.w, displayArea.h, backGround->rect->w, backGround->rect->w);
+	view->transform(displayArea.w, displayArea.h, backGround->rect->w, backGround->rect->h);
 
 	//缓冲区映射到窗口
 	SDL_RenderCopy(renderer, bufferTex, view->rect, &displayArea);
@@ -174,27 +173,36 @@ void Game::destroyBuffer()
 void Game::renderMiniMap(SDL_Renderer* renderer)
 {
 	//小地图
-	SDL_SetRenderDrawColor(renderer, 80, 137, 56, 100);
-	const SDL_FRect rectBigRec = { menuArea.x, 0, 100, 100 };
+	
+	const SDL_FRect rectBigRec = {
+		menuArea.x, h - menuArea.w * backGround->rect->h / backGround->rect->w,
+		menuArea.w, menuArea.w * backGround->rect->h / backGround->rect->w };
+	SDL_SetRenderDrawColor(renderer, 80, 137, 56, 255);
 	SDL_RenderFillRectF(renderer, &rectBigRec);
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	SDL_RenderDrawRectF(renderer, &rectBigRec);
+
+	
 	const SDL_FRect rectSmallRec = {
 		rectBigRec.x + (float)view->rect->x * rectBigRec.w / backGround->rect->w,
 		rectBigRec.y + (float)view->rect->y * rectBigRec.h / backGround->rect->h,
 		(float)view->rect->w / backGround->rect->w * rectBigRec.w,
 		(float)view->rect->h / backGround->rect->h * rectBigRec.h };
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderDrawRectF(renderer, &rectSmallRec);
-	SDL_SetRenderDrawColor(renderer, 254, 183, 98, 255);
+
+	
 	const SDL_FRect rectPlayer = { 
 		rectBigRec.x + (float)player->rect->x * rectBigRec.w / backGround->rect->w,
 		rectBigRec.y + (float)player->rect->y * rectBigRec.h / backGround->rect->h, 3, 3 };
+	SDL_SetRenderDrawColor(renderer, 254, 183, 98, 255);
 	SDL_RenderDrawRectF(renderer, &rectPlayer);
 
 #ifdef _DEBUG //渲染调试信息
 	//计算文字大小
 	char text[256] = { 0 };
 	sprintf_s(text, 255, "(%d,%d,%d,%d)", view->rect->x, view->rect->y, view->rect->w, view->rect->h);
-	SDL_Rect dst = { rectBigRec.x, rectBigRec.y, 100, 21 };
+	SDL_Rect dst = { rectBigRec.x, rectBigRec.y, menuArea.w, 21 };
 	int ret = TTF_SizeText(pDebugFont, text, &(dst.w), &(dst.h));
 	if (ret) {
 		SDL_Log("get text size failed: %s\n", TTF_GetError());
