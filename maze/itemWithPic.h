@@ -29,11 +29,6 @@ public:
 	}
 };
 
-class Block :public ItemWithPic {
-	int x;
-	int y; //在矩阵中的位置
-};
-
 class Player:public ItemWithPic {
 public:
 	int x;

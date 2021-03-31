@@ -3,8 +3,8 @@
 #include"itemWithPic.h"
 #include"maze.h"
 
-#define DISPLAY_WIDTH 800
-#define MENU_WIDTH 100
+#define DISPLAY_WIDTH 850
+#define MENU_WIDTH 150
 
 
 class Game: public GameInterface{

@@ -14,8 +14,14 @@ bool Game::init() {
 
 	displayArea = { menuArea.w, 0, w - menuArea.w, h };
 	backGround = new ItemWithPic(0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
-	player = new Player(0, 0, BLOCK_WIDTH, BLOCK_WIDTH);
-	maze = new Maze(10, 10, backGround);
+	maze = new Maze(20, 25, backGround);
+	maze->create();
+
+	player = new Player(maze->rect->x, maze->rect->y, BLOCK_WIDTH, BLOCK_WIDTH);
+	player->x = maze->entrance[0].x;
+	player->y = maze->entrance[0].y;
+
+	
 
 	view = new View(displayArea.w, displayArea.h, backGround->rect->w, backGround->rect->h);
 	
@@ -94,10 +100,28 @@ void Game::processEvent(SDL_Event* evt){
 			view->moveX(-10);
 
 		//控制人物移动
-		else if (evt->key.keysym.sym == SDLK_w) player->moveUp();
-		else if (evt->key.keysym.sym == SDLK_a) player->moveLeft();
-		else if (evt->key.keysym.sym == SDLK_s) player->moveDown();
-		else if (evt->key.keysym.sym == SDLK_d) player->moveRight();
+		else if (evt->key.keysym.sym == SDLK_w) {
+			if (player->x < 0 || player->y <= 0 || //防越界
+				!maze->matrix[player->x][player->y - 1]) 	
+				player->moveUp();
+		} 
+		else if (evt->key.keysym.sym == SDLK_a) {
+			if (player->x <= 0 || player->y < 0 ||
+				!maze->matrix[player->x - 1][player->y])
+				player->moveLeft();
+		} 
+		else if (evt->key.keysym.sym == SDLK_s) {
+			if (player->x < 0 || player->y < -1 ||
+				!maze->matrix[player->x][player->y + 1])
+
+				player->moveDown();
+		} 
+		else if (evt->key.keysym.sym == SDLK_d) {
+			if (player->x < -1 || player->y < 0 ||
+				!maze->matrix[player->x + 1][player->y])
+
+				player->moveRight();
+		}
 
 	}
 	//控制画面缩放
@@ -182,21 +206,41 @@ void Game::renderMiniMap(SDL_Renderer* renderer)
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderDrawRectF(renderer, &rectBigRec);
 
-	
+	float factor = rectBigRec.w / backGround->rect->w;
+
+	if(player){
+		const SDL_FRect rectPlayer = {
+		rectBigRec.x + (float)player->rect->x * factor,
+		rectBigRec.y + (float)player->rect->y * factor,
+		BLOCK_WIDTH * factor,
+		BLOCK_WIDTH * factor };
+		SDL_SetRenderDrawColor(renderer, 254, 183, 98, 255);
+		SDL_RenderFillRectF(renderer, &rectPlayer);
+	}
+
+	if (maze) {
+		SDL_SetRenderDrawColor(renderer, 81, 104, 69, 255);
+		for (auto i = 0; i < maze->w; i++) {
+			for (auto j = 0; j < maze->h; j++) {
+				if (maze->matrix[i][j]) {
+					SDL_FRect recBlock = {
+						rectBigRec.x + (maze->rect->x + i * BLOCK_WIDTH) * factor,
+						rectBigRec.y + (maze->rect->y + j * BLOCK_WIDTH) * factor,
+						BLOCK_WIDTH * factor,
+						BLOCK_WIDTH * factor
+					};
+					SDL_RenderFillRectF(renderer, &recBlock);
+				}
+			}
+		}
+	}
 	const SDL_FRect rectSmallRec = {
-		rectBigRec.x + (float)view->rect->x * rectBigRec.w / backGround->rect->w,
-		rectBigRec.y + (float)view->rect->y * rectBigRec.h / backGround->rect->h,
-		(float)view->rect->w / backGround->rect->w * rectBigRec.w,
-		(float)view->rect->h / backGround->rect->h * rectBigRec.h };
+		rectBigRec.x + (float)view->rect->x * factor,
+		rectBigRec.y + (float)view->rect->y * factor,
+		(float)view->rect->w * factor,
+		(float)view->rect->h * factor };
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderDrawRectF(renderer, &rectSmallRec);
-
-	
-	const SDL_FRect rectPlayer = { 
-		rectBigRec.x + (float)player->rect->x * rectBigRec.w / backGround->rect->w,
-		rectBigRec.y + (float)player->rect->y * rectBigRec.h / backGround->rect->h, 3, 3 };
-	SDL_SetRenderDrawColor(renderer, 254, 183, 98, 255);
-	SDL_RenderDrawRectF(renderer, &rectPlayer);
 
 #ifdef _DEBUG //渲染调试信息
 	//计算文字大小
