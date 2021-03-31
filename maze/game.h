@@ -3,25 +3,25 @@
 #include"itemWithPic.h"
 #include"maze.h"
 
-#define DISPLAY_WIDTH 850
+#define DISPLAY_WIDTH 800
 #define MENU_WIDTH 150
 
 
 class Game: public GameInterface{
 public:
-	SDL_Surface* bufferSurf;//缓冲区表面
-	SDL_Renderer* bufferRenderer;//缓冲区渲染器
-	TTF_Font* pDebugFont; //调试字体
+	SDL_Surface* bufferSurf;					//缓冲区表面
+	SDL_Renderer* bufferRenderer;				//缓冲区渲染器
+	TTF_Font* pDebugFont;						//调试字体
 
-	POINT mousePos;//当前鼠标位置
-	POINT PreMousePos;//之前鼠标位置
+	POINT mousePos;								//当前鼠标位置
+	POINT PreMousePos;							//之前鼠标位置
 	
-	SDL_Rect menuArea;//菜单区域
+	SDL_Rect menuArea;							//菜单区域
 
-	SDL_Rect displayArea;//显示区域
-	ItemWithPic* backGround;//背景
-	Player* player;//小人
-	Maze* maze;
+	SDL_Rect displayArea;						//显示区域
+	ItemWithPic* backGround;					//背景
+	Player* player;								//小人
+	Maze* maze;									//迷宫
 
 	View* view;//视图
 

@@ -3,7 +3,7 @@
 
 #define BLOCK_WIDTH 20
 #define BACKGROUND_WIDTH 1200
-#define BACKGROUND_HEIGHT 1000
+#define BACKGROUND_HEIGHT 1500
 class ItemWithPic {
 public:
 	SDL_Texture* texture;

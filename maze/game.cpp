@@ -3,16 +3,15 @@
 
 bool Game::init() {
 	title = "迷宫";
-	w = DISPLAY_WIDTH;
-	h = DISPLAY_WIDTH - MENU_WIDTH;
+	w = DISPLAY_WIDTH + MENU_WIDTH;
+	h = DISPLAY_WIDTH;
 	FPS = 30;
 	
 	mousePos = { -1 };
 	PreMousePos = { -1 };
 
-	menuArea = { 0, 0, MENU_WIDTH, h };
-
-	displayArea = { menuArea.w, 0, w - menuArea.w, h };
+	menuArea = { DISPLAY_WIDTH, 0, MENU_WIDTH, h };
+	displayArea = { 0, 0, w - menuArea.w, h };
 	backGround = new ItemWithPic(0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
 	maze = new Maze(20, 25, backGround);
 	maze->create();
@@ -88,6 +87,9 @@ void Game::processEvent(SDL_Event* evt){
 			PreMousePos = mousePos;
 		
 	}
+	else if (evt->type == SDL_MOUSEBUTTONDOWN) {
+		SDL_Log("%d,%d", mousePos.x, mousePos.y);
+	}
 	else if (evt->type == SDL_KEYDOWN) {
 		//控制画面移动
 		if (evt->key.keysym.sym == SDLK_UP && view->rect->y > 0) 
@@ -141,7 +143,6 @@ void Game::processEvent(SDL_Event* evt){
 			view->moveY(-mousePos.y * 0.05f);
 		}
 	}
-	
 }
 
 void Game::update(){
@@ -239,7 +240,7 @@ void Game::renderMiniMap(SDL_Renderer* renderer)
 		rectBigRec.y + (float)view->rect->y * factor,
 		(float)view->rect->w * factor,
 		(float)view->rect->h * factor };
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
 	SDL_RenderDrawRectF(renderer, &rectSmallRec);
 
 #ifdef _DEBUG //渲染调试信息
