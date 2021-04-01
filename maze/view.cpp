@@ -38,6 +38,22 @@ void View::transform(int winW, int winH, int bgW, int bgH)
 			(int)((bgH - winH) * 0.5f + moveFactorY) ,
 			(int)(winW * scaleFactor),(int)(winH * scaleFactor) };
 	//±ß½ç¿ØÖÆ
+	if (rect->w > bgW) {
+		rect->x = 0;
+		rect->w = bgW;
+		rect->h = rect->w * winH/(float)winW;
+		moveFactorX = (bgW - winW) * -0.5f;
+		scaleFactor = (float)bgW / winW;
+	}
+	//vW/vH = winW/winH   vW = 
+	if (rect->h > bgH) {
+		rect->y = 0;
+		rect->h = bgH;
+		rect->w = rect->h * winW/(float)winH;
+		
+		moveFactorY = (bgH - winH) * -0.5f;
+		scaleFactor = (float)bgH / winH;
+	}
 	if (rect->x <= 0) {
 		rect->x = 0;
 		moveFactorX = (bgW - winW) * -0.5f;
@@ -54,19 +70,6 @@ void View::transform(int winW, int winH, int bgW, int bgH)
 		rect->y = bgH - rect->h;
 		moveFactorY = (bgH - rect->h) - (bgH - winH) * 0.5f;
 	} 
-	if (rect->w > bgW) {
-		rect->x = 0;
-		rect->w = bgW; rect->h = bgW;
-		moveFactorX = (bgW - winW) * -0.5f;
-		//moveFactorY = (bgH - winH) * -0.5f;
-		scaleFactor = (float)bgW / winW;
-	}
-	if (rect->h > bgH) {
-		rect->y = 0;
-		rect->w = bgH; rect->h = bgH;
-		//moveFactorX = (bgW - winW) * -0.5f;
-		moveFactorY = (bgH - winH) * -0.5f;
-		scaleFactor = (float)bgH / winH;
-	}
+	
 }
 
