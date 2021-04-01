@@ -14,7 +14,7 @@ bool Game::init() {
 	menuArea = { displayArea.w, 0, MENU_WIDTH, h };
 	backGround = new ItemWithPic(0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
 	maze = new Maze(20, 25, backGround);
-	maze->create();
+	maze->create(CREATE_STRATEGY_DEFAULT);
 
 	player = new Player(maze->rect->x, maze->rect->y, BLOCK_WIDTH, BLOCK_WIDTH);
 	player->x = maze->entrance[0].x;
@@ -40,7 +40,7 @@ bool Game::loadResource() {
 	//创建缓冲区
 	if(!createBuffer()) return false;
 	//加载图片
-	SDL_Surface* Surf = IMG_Load("res\\image\\background.png");
+	SDL_Surface* Surf = IMG_Load("res\\image\\background2.png");
 	backGround->texture = SDL_CreateTextureFromSurface(bufferRenderer, Surf);
 
 	Surf = IMG_Load("res\\image\\player.png");
@@ -207,7 +207,7 @@ void Game::renderMiniMap(SDL_Renderer* renderer)
 	const SDL_FRect rectBigRec = {
 		menuArea.x, h - menuArea.w * backGround->rect->h / backGround->rect->w,
 		menuArea.w, menuArea.w * backGround->rect->h / backGround->rect->w };
-	SDL_SetRenderDrawColor(renderer, 80, 137, 56, 255);
+	SDL_SetRenderDrawColor(renderer, 156, 133, 46, 255);
 	SDL_RenderFillRectF(renderer, &rectBigRec);
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderDrawRectF(renderer, &rectBigRec);

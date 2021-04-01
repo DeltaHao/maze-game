@@ -5,7 +5,6 @@ View::View(int winW, int winH, int bgW, int bgH)
 {
 	rect = new SDL_Rect();
 	*rect = { (int)((bgW - winW)*0.5f), (int)((bgH - winH) * 0.5f), winW, winH };
-
 	scaleFactor = 1;
 	moveFactorX = 0;
 	moveFactorY = 0;
@@ -45,7 +44,6 @@ void View::transform(int winW, int winH, int bgW, int bgH)
 		moveFactorX = (bgW - winW) * -0.5f;
 		scaleFactor = (float)bgW / winW;
 	}
-	//vW/vH = winW/winH   vW = 
 	if (rect->h > bgH) {
 		rect->y = 0;
 		rect->h = bgH;

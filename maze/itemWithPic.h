@@ -1,7 +1,7 @@
 #pragma once
 #include"SDL.h"
 
-#define BLOCK_WIDTH 20
+#define BLOCK_WIDTH 25
 #define BACKGROUND_WIDTH 1500
 #define BACKGROUND_HEIGHT 1500
 class ItemWithPic {
