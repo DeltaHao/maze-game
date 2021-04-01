@@ -2,7 +2,7 @@
 #include"SDL.h"
 
 #define BLOCK_WIDTH 20
-#define BACKGROUND_WIDTH 1200
+#define BACKGROUND_WIDTH 1500
 #define BACKGROUND_HEIGHT 1500
 class ItemWithPic {
 public:
@@ -20,12 +20,11 @@ public:
 			SDL_DestroyTexture(texture);
 			texture = NULL;
 		}
-		
 		delete rect;
 		delete rectInTexture;
 	}
 	virtual void render(SDL_Renderer* renderer) {
-		SDL_RenderCopy(renderer, texture, 0, rect);
+		SDL_RenderCopy(renderer, texture, rect, rect);
 	}
 };
 
@@ -53,6 +52,9 @@ public:
 	void moveDown() {
 		y += 1;
 		rect->y += rect->h;
+	}
+	virtual void render(SDL_Renderer* renderer) {
+		SDL_RenderCopy(renderer, texture, NULL, rect);
 	}
 };
 

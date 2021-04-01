@@ -30,7 +30,7 @@ public:
 	int w = DEFAULT_WINDOW_WIDTH;
 	int h = DEFAULT_WINDOW_HEIGHT;								//窗口大小
 	unsigned int FPS = DEFAULT_FPS;								//更新帧率
-	bool isResizable = 0;										//窗口大小是否可调节
+	bool isResizable = 1;										//窗口大小是否可调节
 
 
 	virtual ~GameInterface() = default;

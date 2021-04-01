@@ -10,8 +10,8 @@ bool Game::init() {
 	mousePos = { -1 };
 	PreMousePos = { -1 };
 
-	menuArea = { DISPLAY_WIDTH, 0, MENU_WIDTH, h };
-	displayArea = { 0, 0, w - menuArea.w, h };
+	displayArea = { 0, 0, w - MENU_WIDTH, h };
+	menuArea = { displayArea.w, 0, MENU_WIDTH, h };
 	backGround = new ItemWithPic(0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
 	maze = new Maze(20, 25, backGround);
 	maze->create();
@@ -70,7 +70,7 @@ bool Game::unloadResource()
 
 void Game::processEvent(SDL_Event* evt){
 	
-
+	
 	if (evt->type == SDL_MOUSEMOTION) {
 		//记录鼠标位置
 		mousePos.x = evt->motion.x;
@@ -143,6 +143,10 @@ void Game::processEvent(SDL_Event* evt){
 			view->moveY(-mousePos.y * 0.05f);
 		}
 	}
+
+	else if (evt->type == SDL_DISPLAYEVENT) {
+		int a = 0;
+	}
 }
 
 void Game::update(){
@@ -161,6 +165,8 @@ void Game::render(SDL_Window*, SDL_Renderer* renderer){
 	view->transform(displayArea.w, displayArea.h, backGround->rect->w, backGround->rect->h);
 
 	//缓冲区映射到窗口
+	displayArea = { 0, 0, w - MENU_WIDTH, h };
+	menuArea = { displayArea.w, 0, MENU_WIDTH, h };
 	SDL_RenderCopy(renderer, bufferTex, view->rect, &displayArea);
 	SDL_DestroyTexture(bufferTex);
 
@@ -187,7 +193,6 @@ bool Game::createBuffer()
 	}
 	return true;
 }
-
 
 void Game::destroyBuffer()
 {

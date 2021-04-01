@@ -102,7 +102,7 @@ void GameFrame::run()
 		fps = game->FPS;
 	}
 
-	int quit = 0;
+	
 	SDL_Event evt;
 
 	Uint64 nFrequency, nPrevCounter, nCurrCounter, nElapsedCounter;
@@ -111,14 +111,12 @@ void GameFrame::run()
 	nFrequency = SDL_GetPerformanceFrequency();
 	nPrevCounter = SDL_GetPerformanceCounter();
 
-	while (!quit) {
+	while (true) {
 		if (SDL_PollEvent(&evt)) {
-			if (evt.type == SDL_QUIT) {
-				quit = 1;
-			}
-			else {
-				game->processEvent(&evt);
-			}
+			if (evt.type == SDL_QUIT)
+				break;
+			SDL_GetWindowSize(pWin, &game->w, &game->h);
+			game->processEvent(&evt);
 		}
 		else {
 			nCurrCounter = SDL_GetPerformanceCounter();
@@ -133,7 +131,7 @@ void GameFrame::run()
 				lag -= frameMS;
 			}
 			//Çå³ı±³¾°
-			SDL_SetRenderDrawColor(pRenderer, 0, 0, 0, 255);
+			SDL_SetRenderDrawColor(pRenderer, 255, 255, 255, 255);
 			SDL_RenderClear(pRenderer);
 			//äÖÈ¾Í¼Ïñ
 			game->render(pWin, pRenderer);
