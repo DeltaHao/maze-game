@@ -17,10 +17,14 @@ public:
 	std::vector<POINT> entrance;
 	std::vector<POINT> exit;
 	bool matrix[MAX_MAZE_LEN][MAX_MAZE_LEN];
-	
+
 	Maze(int w, int h, ItemWithPic* bg);
 	~Maze();
 	void clear();
 	virtual void render(SDL_Renderer* renderer);
-	void create(int strategy);
+	POINT createGate(int);
+	void create(int strategy, int pathNum);
+	bool isInArea(int x, int y) {
+		return x > 0 && x < w - 1 && y > 0 && y < h;
+	}
 };

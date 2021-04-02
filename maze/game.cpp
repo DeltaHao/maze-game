@@ -13,14 +13,17 @@ bool Game::init() {
 	displayArea = { 0, 0, w - MENU_WIDTH, h };
 	menuArea = { displayArea.w, 0, MENU_WIDTH, h };
 	backGround = new ItemWithPic(0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
-	maze = new Maze(20, 25, backGround);
-	maze->create(CREATE_STRATEGY_DEFAULT);
+	maze = new Maze(30, 20, backGround);
+	maze->create(CREATE_STRATEGY_DFS, 1);
 
-	player = new Player(maze->rect->x, maze->rect->y, BLOCK_WIDTH, BLOCK_WIDTH);
-	player->x = maze->entrance[0].x;
-	player->y = maze->entrance[0].y;
-
-	
+	player = new Player(
+		maze->rect->x + maze->entrance[maze->entrance.size() - 1].x * BLOCK_WIDTH,
+		maze->rect->y + maze->entrance[maze->entrance.size() - 1].y * BLOCK_WIDTH,
+		BLOCK_WIDTH, 
+		BLOCK_WIDTH
+	);
+	player->x = maze->entrance[maze->entrance.size() - 1].x;
+	player->y = maze->entrance[maze->entrance.size() - 1].y;
 
 	view = new View(displayArea.w, displayArea.h, backGround->rect->w, backGround->rect->h);
 	

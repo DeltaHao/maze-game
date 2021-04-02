@@ -1,5 +1,4 @@
 #include "gameFrame.h"
-#include "sgfHelper.h"
 
 bool GameFrame::init()
 {

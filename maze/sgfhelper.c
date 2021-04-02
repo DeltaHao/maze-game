@@ -78,4 +78,13 @@ int GBKToUTF8(const char* gbk, int gbklen, char* utf8, int utf8len)
 	return bufMLen;
 }
 
+int randEx(int x, int y)
+{
+	LARGE_INTEGER seed;
+	QueryPerformanceFrequency(&seed);
+	QueryPerformanceCounter(&seed);
+	srand(seed.QuadPart);
+
+	return rand()%y + x;
+}
 

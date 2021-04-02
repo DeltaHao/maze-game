@@ -26,8 +26,8 @@ typedef struct SDL_RWops SDL_RWops;
   */
 
 int GBKToUTF8(const char* gbk, int gbklen, char* utf8, int utf8len);
-
-
+//生成随机数
+int randEx(int x, int y);
 #ifdef __cplusplus
 }
 #endif

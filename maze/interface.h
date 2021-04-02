@@ -9,7 +9,7 @@
 #pragma comment( linker, "/subsystem:windows /entry:mainCRTStartup" )
 #include<Windows.h>
 #include<iostream>
-
+#include"sgfhelper.h"
 extern "C" {
 #include"SDL.h"
 #include"SDL_main.h"
