@@ -1,7 +1,7 @@
 #include"itemWithPic.h"
 
 void StatusBar::render(SDL_Renderer* renderer, TTF_Font* font) {
-	SDL_RenderCopy(renderer, texture, NULL, rect);
+	SDL_RenderCopy(renderer, textures[index], NULL, rect);
 
 	//отй╬ндвж
 	char text1[256] = { 0 };

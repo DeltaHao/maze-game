@@ -13,9 +13,11 @@ public:
 	SDL_Renderer* bufferRenderer;				//缓冲区渲染器
 	TTF_Font* pDebugFont;						//调试字体
 	TTF_Font* pMemuFont;						//菜单字体
+	TTF_Font* pInfoFont;						//提示字体
 	int frames;									//经过的帧数
 	int level;									//关卡号
 	bool isClearance = false;					//是否通关
+	char info[32];
 
 	POINT mousePos;								//当前鼠标位置
 	POINT PreMousePos;							//之前鼠标位置
@@ -43,4 +45,5 @@ public:
 	void destroyBuffer();//销毁内存缓冲区
 	void renderMiniMap(SDL_Renderer*);//画小地图
 	bool refreshLevel();//刷新关卡
+	void showInformation(char* text, SDL_Renderer* renderer);
 };

@@ -18,7 +18,7 @@ void Maze::render(SDL_Renderer* renderer){
 					BLOCK_WIDTH,
 					BLOCK_WIDTH
 				};
-				SDL_RenderCopy(renderer, texture, 0, &recBlock);
+				SDL_RenderCopy(renderer, textures[index], 0, &recBlock);
 			}
 		}
 	}	
