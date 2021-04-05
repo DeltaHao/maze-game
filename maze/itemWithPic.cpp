@@ -1,9 +1,10 @@
 #include"itemWithPic.h"
 
-void StatusBar::render(SDL_Renderer* renderer, TTF_Font* font) {
+void StatusBar::render(SDL_Renderer* renderer) {
 	SDL_RenderCopy(renderer, textures[index], NULL, rect);
 
 	//отй╬ндвж
+	TTF_Font* font = TTF_OpenFont("res\\fonts\\SHOWG.TTF", 24);
 	char text1[256] = { 0 };
 	char text2[256] = { 0 };
 	sprintf_s(text1, 255, "STEP:%d", steps);

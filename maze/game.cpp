@@ -88,15 +88,14 @@ bool Game::loadResource(SDL_Renderer* winRenderer) {
 
 
 	//创建字体
-	pDebugFont = TTF_OpenFont("res\\fonts\\courbd.ttf", 13);
-	pMemuFont = TTF_OpenFont("res\\fonts\\SHOWG.TTF", 24);
-	pInfoFont = TTF_OpenFont("res\\fonts\\SHOWG.TTF", 18);
+	
+	
+	
 	return true;
 }
 
 bool Game::unloadResource()
 {
-	TTF_CloseFont(pDebugFont);
 	return false;
 }
 
@@ -159,11 +158,8 @@ void Game::processEvent(SDL_Event* evt){
 				for (auto i : maze->exit) 
 					if (player->x == i.x && player->y == i.y) {
 						isClearance = true;
-						sprintf_s(info, 32, "      LEVEL UP!!!");
-						             
+						sprintf_s(info, 32, "      LEVEL UP!!!");	             
 					}
-						
-				
 			}	
 		} 
 		else if (evt->key.keysym.sym == SDLK_a) {
@@ -269,7 +265,7 @@ void Game::render(SDL_Window*, SDL_Renderer* renderer){
 
 	
 	menuBG->render(renderer);//菜单背景
-	statusBar->render(renderer, pMemuFont);
+	statusBar->render(renderer);
 	button0->render(renderer);
 	renderMiniMap(renderer);//画小地图
 
@@ -368,6 +364,7 @@ void Game::renderMiniMap(SDL_Renderer* renderer)
 
 #ifdef _DEBUG //渲染调试信息
 	//计算文字大小
+	TTF_Font* pDebugFont = TTF_OpenFont("res\\fonts\\courbd.ttf", 13);
 	char text[256] = { 0 };
 	sprintf_s(text, 255, "(%d,%d,%d,%d)", view->rect->x, view->rect->y, view->rect->w, view->rect->h);
 	SDL_Rect dst = { rectBigRec.x, rectBigRec.y, menuArea.w, 21 };
@@ -390,6 +387,9 @@ void Game::renderMiniMap(SDL_Renderer* renderer)
 }
 
 bool Game::refreshLevel() {
+	statusBar->steps = 0;
+	statusBar->seconds = 0;
+	frames = 0;
 	isClearance = false;
 	sprintf_s(info, 32, "");
 	int W = 10 + randEx(0, 3) + level * 3;
@@ -403,6 +403,7 @@ bool Game::refreshLevel() {
 
 void Game::showInformation(char* text, SDL_Renderer* renderer){
 	//显示文字
+	TTF_Font* pInfoFont = TTF_OpenFont("res\\fonts\\SHOWG.TTF", 18);
 	SDL_Rect dst1 = { menuArea.x, button0->rect->y - 30, menuArea.w, 21 };
 	TTF_SizeText(pInfoFont, text, &(dst1.w), &(dst1.h));
 

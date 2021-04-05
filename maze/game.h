@@ -11,9 +11,6 @@ class Game: public GameInterface{
 public:
 	SDL_Surface* bufferSurf;					//缓冲区表面
 	SDL_Renderer* bufferRenderer;				//缓冲区渲染器
-	TTF_Font* pDebugFont;						//调试字体
-	TTF_Font* pMemuFont;						//菜单字体
-	TTF_Font* pInfoFont;						//提示字体
 	int frames;									//经过的帧数
 	int level;									//关卡号
 	bool isClearance = false;					//是否通关

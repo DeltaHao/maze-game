@@ -6,6 +6,8 @@ void Maze::clear(){
 	for (auto i = 0; i < w; i++)
 		for (auto j = 0; j < h; j++)
 			matrix[i][j] = false;
+	entrance.clear();
+	exit.clear();
 }
 
 void Maze::render(SDL_Renderer* renderer){

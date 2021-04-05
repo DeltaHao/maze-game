@@ -47,6 +47,6 @@ public:
 		seconds = 0;
 	};
 	//жиди
-	virtual void render(SDL_Renderer* renderer, TTF_Font* font);
+	virtual void render(SDL_Renderer* renderer);
 };
 
