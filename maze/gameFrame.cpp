@@ -86,7 +86,7 @@ bool GameFrame::init()
 
 
 	//加载游戏资源
-	ret = game->loadResource();
+	ret = game->loadResource(pRenderer);
 	if (!ret) {
 		SDL_Log("Unable to load resource");
 		return false;

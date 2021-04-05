@@ -12,21 +12,24 @@ public:
 	SDL_Surface* bufferSurf;					//缓冲区表面
 	SDL_Renderer* bufferRenderer;				//缓冲区渲染器
 	TTF_Font* pDebugFont;						//调试字体
+	TTF_Font* pMemuFont;						//菜单字体
+	int frames;									//经过的帧数
 
 	POINT mousePos;								//当前鼠标位置
 	POINT PreMousePos;							//之前鼠标位置
 	
 	SDL_Rect menuArea;							//菜单区域
+	ItemWithPic* menuBG;						//菜单背景
+	StatusBar* statusBar;						//菜单状态栏
 
 	SDL_Rect displayArea;						//显示区域
 	ItemWithPic* backGround;					//背景
 	Player* player;								//小人
 	Maze* maze;									//迷宫
-
-	View* view;//视图
+	View* view;									//视图
 
 	virtual bool init();							//初始化游戏
-	virtual bool loadResource();					//加载游戏资源	
+	virtual bool loadResource(SDL_Renderer* );		//加载游戏资源	
 	virtual bool unloadResource();					//释放游戏资源
 	virtual void processEvent(SDL_Event*);			//处理游戏事件
 	virtual void update();							//更新游戏数据

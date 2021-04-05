@@ -35,7 +35,7 @@ public:
 
 	virtual ~GameInterface() = default;
 	virtual bool init() = 0;									//初始化游戏
-	virtual bool loadResource() = 0;							//加载游戏资源
+	virtual bool loadResource(SDL_Renderer*) = 0;							//加载游戏资源
 	virtual bool unloadResource() = 0;				//释放游戏资源
 	virtual void processEvent(SDL_Event*) = 0;					//处理游戏事件
 	virtual void update() = 0;									//更新游戏数据

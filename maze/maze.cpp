@@ -131,7 +131,6 @@ void Maze::create(int strategy, int pathNum)
 			stk.pop();
 			//随机选择一个方向进行探索
 			for (int i = 0; i < 4; i++) {
-				LARGE_INTEGER seed;
 				
 				int tmp = randEx(0, 4);
 				switch (tmp)

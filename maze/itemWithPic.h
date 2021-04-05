@@ -1,5 +1,5 @@
 #pragma once
-#include"SDL.h"
+#include"interface.h"
 
 #define BLOCK_WIDTH 25
 #define BACKGROUND_WIDTH 1500
@@ -24,8 +24,30 @@ public:
 		delete rectInTexture;
 	}
 	virtual void render(SDL_Renderer* renderer) {
+		SDL_RenderCopy(renderer, texture, NULL, rect);
+	}
+};
+
+
+class BackGround: public ItemWithPic {
+public:
+	BackGround(float x, float y, int w, int h):ItemWithPic(x, y, w, h) {};
+	virtual void render(SDL_Renderer* renderer) {
 		SDL_RenderCopy(renderer, texture, rect, rect);
 	}
+};
+
+class StatusBar: public ItemWithPic {
+public:
+	int steps;
+	int seconds;
+	StatusBar(float x, float y, int w, int h) :ItemWithPic(x, y, w, h) {
+		steps = 0;
+		seconds = 0;
+	};
+	//жиди
+	virtual void render(SDL_Renderer* renderer, TTF_Font* font);
+
 };
 
 class Player:public ItemWithPic {
@@ -52,9 +74,6 @@ public:
 	void moveDown() {
 		y += 1;
 		rect->y += rect->h;
-	}
-	virtual void render(SDL_Renderer* renderer) {
-		SDL_RenderCopy(renderer, texture, NULL, rect);
 	}
 };
 

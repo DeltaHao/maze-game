@@ -36,6 +36,9 @@
     <ClCompile Include="maze.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="itemWithPic.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game.h">

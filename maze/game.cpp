@@ -10,11 +10,14 @@ bool Game::init() {
 	mousePos = { -1 };
 	PreMousePos = { -1 };
 
+	menuArea = { w - MENU_WIDTH, 0, MENU_WIDTH, h };
+	menuBG = new ItemWithPic(menuArea.x, menuArea.y, menuArea.w, menuArea.h);
+	statusBar = new StatusBar(menuArea.x, menuArea.y, menuArea.w, menuArea.w);
+
 	displayArea = { 0, 0, w - MENU_WIDTH, h };
-	menuArea = { displayArea.w, 0, MENU_WIDTH, h };
-	backGround = new ItemWithPic(0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
-	maze = new Maze(30, 20, backGround);
-	maze->create(CREATE_STRATEGY_DFS, 1);
+	backGround = new BackGround(0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
+	maze = new Maze(40, 40, backGround);
+	maze->create(CREATE_STRATEGY_DFS, 4);
 
 	player = new Player(
 		maze->rect->x + maze->entrance[maze->entrance.size() - 1].x * BLOCK_WIDTH,
@@ -38,29 +41,29 @@ Game::~Game() {
 	destroyBuffer();
 }
 
-bool Game::loadResource() {
+bool Game::loadResource(SDL_Renderer* winRenderer) {
 
 	//创建缓冲区
 	if(!createBuffer()) return false;
 	//加载图片
 	SDL_Surface* Surf = IMG_Load("res\\image\\background2.png");
 	backGround->texture = SDL_CreateTextureFromSurface(bufferRenderer, Surf);
-
 	Surf = IMG_Load("res\\image\\player.png");
 	player->texture = SDL_CreateTextureFromSurface(bufferRenderer, Surf);
 	Surf = IMG_Load("res\\image\\block.png");
 	maze->texture = SDL_CreateTextureFromSurface(bufferRenderer, Surf);
 
+	Surf = IMG_Load("res\\image\\memuBG0.png");
+	menuBG->texture = SDL_CreateTextureFromSurface(winRenderer, Surf);
+	Surf = IMG_Load("res\\image\\statusBar.png");
+	statusBar->texture = SDL_CreateTextureFromSurface(winRenderer, Surf);
+
 	SDL_FreeSurface(Surf);
 
 
-	//创建默认字体
-
-	pDebugFont = TTF_OpenFont("res\\fonts\\courbd.ttf", 10);
-	if (!pDebugFont) {
-		SDL_Log("Could not open font: %s\n", SDL_GetError());
-		return false;
-	}
+	//创建字体
+	pDebugFont = TTF_OpenFont("res\\fonts\\courbd.ttf", 13);
+	pMemuFont = TTF_OpenFont("res\\fonts\\ariblk.ttf", 20);
 	return true;
 }
 
@@ -107,25 +110,37 @@ void Game::processEvent(SDL_Event* evt){
 		//控制人物移动
 		else if (evt->key.keysym.sym == SDLK_w) {
 			if (player->x < 0 || player->y <= 0 || //防越界
-				!maze->matrix[player->x][player->y - 1]) 	
+				!maze->matrix[player->x][player->y - 1]) {
 				player->moveUp();
+				statusBar->steps++;
+			}
+				
 		} 
 		else if (evt->key.keysym.sym == SDLK_a) {
 			if (player->x <= 0 || player->y < 0 ||
-				!maze->matrix[player->x - 1][player->y])
+				!maze->matrix[player->x - 1][player->y]) {
 				player->moveLeft();
+				statusBar->steps++;
+			}
+				
 		} 
 		else if (evt->key.keysym.sym == SDLK_s) {
 			if (player->x < 0 || player->y < -1 ||
-				!maze->matrix[player->x][player->y + 1])
-
+				!maze->matrix[player->x][player->y + 1]) {
 				player->moveDown();
+				statusBar->steps++;
+			}
+
+				
 		} 
 		else if (evt->key.keysym.sym == SDLK_d) {
 			if (player->x < -1 || player->y < 0 ||
-				!maze->matrix[player->x + 1][player->y])
-
+				!maze->matrix[player->x + 1][player->y]) {
 				player->moveRight();
+				statusBar->steps++;
+			}
+
+				
 		}
 
 	}
@@ -153,14 +168,16 @@ void Game::processEvent(SDL_Event* evt){
 }
 
 void Game::update(){
-
+	frames++;
+	if (frames % FPS == 0) 
+		statusBar->seconds++;
 }
 
 void Game::render(SDL_Window*, SDL_Renderer* renderer){
 	//把图片绘制到内存缓冲区
 	backGround->render(bufferRenderer);//背景
 	player->render(bufferRenderer);//小人
-	maze->render(bufferRenderer);
+	maze->render(bufferRenderer);//迷宫
 	
 
 	//创建缓冲区纹理
@@ -170,11 +187,16 @@ void Game::render(SDL_Window*, SDL_Renderer* renderer){
 	//缓冲区映射到窗口
 	displayArea = { 0, 0, w - MENU_WIDTH, h };
 	menuArea = { displayArea.w, 0, MENU_WIDTH, h };
+	menuBG->rect->x = menuArea.x;
+	statusBar->rect->x = menuArea.x;
+
 	SDL_RenderCopy(renderer, bufferTex, view->rect, &displayArea);
 	SDL_DestroyTexture(bufferTex);
 
-	//画小地图
-	renderMiniMap(renderer);
+	
+	menuBG->render(renderer);//菜单背景
+	statusBar->render(renderer, pMemuFont);
+	renderMiniMap(renderer);//画小地图
 }
 
 
@@ -208,8 +230,10 @@ void Game::renderMiniMap(SDL_Renderer* renderer)
 	//小地图
 	
 	const SDL_FRect rectBigRec = {
-		menuArea.x, h - menuArea.w * backGround->rect->h / backGround->rect->w,
-		menuArea.w, menuArea.w * backGround->rect->h / backGround->rect->w };
+		menuArea.x, 
+		h - menuArea.w * backGround->rect->h / backGround->rect->w,
+		menuArea.w,
+		menuArea.w * backGround->rect->h / backGround->rect->w };
 	SDL_SetRenderDrawColor(renderer, 156, 133, 46, 255);
 	SDL_RenderFillRectF(renderer, &rectBigRec);
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);

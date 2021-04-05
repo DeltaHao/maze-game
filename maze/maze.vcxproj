@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="game.cpp" />
     <ClCompile Include="gameFrame.cpp" />
+    <ClCompile Include="itemWithPic.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="maze.cpp" />
     <ClCompile Include="sgfhelper.c" />
