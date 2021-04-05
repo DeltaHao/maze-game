@@ -13,23 +13,21 @@ bool Game::init() {
 	menuArea = { w - MENU_WIDTH, 0, MENU_WIDTH, h };
 	menuBG = new ItemWithPic(menuArea.x, menuArea.y, menuArea.w, menuArea.h);
 	statusBar = new StatusBar(menuArea.x, menuArea.y, menuArea.w, menuArea.w);
+	button0 = new ItemWithPic(
+		menuArea.x,
+		statusBar->rect->y + statusBar->rect->h + 20,
+		menuArea.w,
+		60
+	);
 
 	displayArea = { 0, 0, w - MENU_WIDTH, h };
 	backGround = new BackGround(0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
-	maze = new Maze(40, 40, backGround);
-	maze->create(CREATE_STRATEGY_DFS, 4);
-
-	player = new Player(
-		maze->rect->x + maze->entrance[maze->entrance.size() - 1].x * BLOCK_WIDTH,
-		maze->rect->y + maze->entrance[maze->entrance.size() - 1].y * BLOCK_WIDTH,
-		BLOCK_WIDTH, 
-		BLOCK_WIDTH
-	);
-	player->x = maze->entrance[maze->entrance.size() - 1].x;
-	player->y = maze->entrance[maze->entrance.size() - 1].y;
+	maze = new Maze();
+	player = new Player();
 
 	view = new View(displayArea.w, displayArea.h, backGround->rect->w, backGround->rect->h);
-	
+
+	refreshLevel();
 	return true;
 }
 
@@ -57,13 +55,15 @@ bool Game::loadResource(SDL_Renderer* winRenderer) {
 	menuBG->texture = SDL_CreateTextureFromSurface(winRenderer, Surf);
 	Surf = IMG_Load("res\\image\\statusBar.png");
 	statusBar->texture = SDL_CreateTextureFromSurface(winRenderer, Surf);
+	Surf = IMG_Load("res\\image\\button0-disabled.png");
+	button0->texture = SDL_CreateTextureFromSurface(winRenderer, Surf);
 
 	SDL_FreeSurface(Surf);
 
 
 	//创建字体
 	pDebugFont = TTF_OpenFont("res\\fonts\\courbd.ttf", 13);
-	pMemuFont = TTF_OpenFont("res\\fonts\\ariblk.ttf", 20);
+	pMemuFont = TTF_OpenFont("res\\fonts\\SHOWG.TTF", 24);
 	return true;
 }
 
@@ -82,19 +82,28 @@ void Game::processEvent(SDL_Event* evt){
 		mousePos.x = evt->motion.x;
 		mousePos.y = evt->motion.y;
 		//鼠标拖拽控制画面移动
-		if (evt->motion.state == SDL_PRESSED) {
-			if (PreMousePos.x > 0 && PreMousePos.y > 0) {
-				view->moveX(mousePos.x - PreMousePos.x);
-				view->moveY(mousePos.y - PreMousePos.y);
+		if (isInArea(mousePos, displayArea)) {
+			if (evt->motion.state == SDL_PRESSED) {
+				if (PreMousePos.x > 0 && PreMousePos.y > 0) {
+					view->moveX(mousePos.x - PreMousePos.x);
+					view->moveY(mousePos.y - PreMousePos.y);
+				}
+				PreMousePos = mousePos;
 			}
-			PreMousePos = mousePos;
+			else if (evt->motion.state == SDL_RELEASED)
+				PreMousePos = mousePos;
+
 		}
-		else if (evt->motion.state == SDL_RELEASED) 
-			PreMousePos = mousePos;
-		
 	}
 	else if (evt->type == SDL_MOUSEBUTTONDOWN) {
-		SDL_Log("%d,%d", mousePos.x, mousePos.y);
+		if (isInArea(mousePos, *button0->rect)) {
+			if (isClearance) {
+				level++;
+				if (!refreshLevel()) {
+					//TODO:游戏结束;
+				}
+			}
+		}
 	}
 	else if (evt->type == SDL_KEYDOWN) {
 		//控制画面移动
@@ -113,24 +122,31 @@ void Game::processEvent(SDL_Event* evt){
 				!maze->matrix[player->x][player->y - 1]) {
 				player->moveUp();
 				statusBar->steps++;
-			}
+				for (auto i : maze->exit) 
+					if (player->x == i.x && player->y == i.y)
+						isClearance = true;
 				
+			}	
 		} 
 		else if (evt->key.keysym.sym == SDLK_a) {
 			if (player->x <= 0 || player->y < 0 ||
 				!maze->matrix[player->x - 1][player->y]) {
 				player->moveLeft();
 				statusBar->steps++;
-			}
-				
+				for (auto i : maze->exit)
+					if (player->x == i.x && player->y == i.y)
+						isClearance = true;
+			}	
 		} 
 		else if (evt->key.keysym.sym == SDLK_s) {
 			if (player->x < 0 || player->y < -1 ||
 				!maze->matrix[player->x][player->y + 1]) {
 				player->moveDown();
 				statusBar->steps++;
+				for (auto i : maze->exit)
+					if (player->x == i.x && player->y == i.y)
+						isClearance = true;
 			}
-
 				
 		} 
 		else if (evt->key.keysym.sym == SDLK_d) {
@@ -138,30 +154,42 @@ void Game::processEvent(SDL_Event* evt){
 				!maze->matrix[player->x + 1][player->y]) {
 				player->moveRight();
 				statusBar->steps++;
+				for (auto i : maze->exit)
+					if (player->x == i.x && player->y == i.y)
+						isClearance = true;
+			}	
+		}
+		//控制下一关
+		else if (evt->key.keysym.sym == SDLK_RETURN) {
+			if (isClearance) {
+				level++;
+				if (!refreshLevel()) {
+					//TODO:游戏结束;
+				}
 			}
-
-				
 		}
 
 	}
-	//控制画面缩放
+	
 	else if (evt->type == SDL_MOUSEWHEEL) {
+		//控制画面缩放
 
-		if (view->rect->w > backGround->rect->w)
-			return;
+		if (isInArea(mousePos, displayArea)) {
+			if (view->rect->w > backGround->rect->w)
+				return;
 
-		view->zoom(evt->wheel.y * 0.05f);
+			view->zoom(evt->wheel.y * 0.05f);
 
-		if (evt->wheel.y < 0) {
-			view->moveX(mousePos.x * 0.05f);
-			view->moveY(mousePos.y * 0.05f);
-		}
-		else {
-			view->moveX(-mousePos.x * 0.05f);
-			view->moveY(-mousePos.y * 0.05f);
-		}
+			if (evt->wheel.y < 0) {
+				view->moveX(mousePos.x * 0.05f);
+				view->moveY(mousePos.y * 0.05f);
+			}
+			else {
+				view->moveX(-mousePos.x * 0.05f);
+				view->moveY(-mousePos.y * 0.05f);
+			}
+		}	
 	}
-
 	else if (evt->type == SDL_DISPLAYEVENT) {
 		int a = 0;
 	}
@@ -189,6 +217,7 @@ void Game::render(SDL_Window*, SDL_Renderer* renderer){
 	menuArea = { displayArea.w, 0, MENU_WIDTH, h };
 	menuBG->rect->x = menuArea.x;
 	statusBar->rect->x = menuArea.x;
+	button0->rect->x = menuArea.x;
 
 	SDL_RenderCopy(renderer, bufferTex, view->rect, &displayArea);
 	SDL_DestroyTexture(bufferTex);
@@ -196,9 +225,9 @@ void Game::render(SDL_Window*, SDL_Renderer* renderer){
 	
 	menuBG->render(renderer);//菜单背景
 	statusBar->render(renderer, pMemuFont);
+	button0->render(renderer);
 	renderMiniMap(renderer);//画小地图
 }
-
 
 
 bool Game::createBuffer()
@@ -296,4 +325,14 @@ void Game::renderMiniMap(SDL_Renderer* renderer)
 		SDL_FreeSurface(surf);
 	}
 #endif // DEBUG
+}
+
+bool Game::refreshLevel() {
+	isClearance = false;
+	int W = 10 + randEx(0, 3) + level * 3;
+	int H = 10 + randEx(0, W/3) + level * 3;
+	int C = randEx(0, 5);
+	if(!maze->create(W, H, CREATE_STRATEGY_DFS, C, backGround))
+		return false;
+	player->adjustPos(maze);
 }

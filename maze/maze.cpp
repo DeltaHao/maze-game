@@ -1,22 +1,6 @@
 #include"maze.h"
 #include<stack>
 
-Maze::Maze(int w, int h, ItemWithPic* bg):ItemWithPic(
-	(bg->rect->w - w * BLOCK_WIDTH) * 0.5f,
-	(bg->rect->h - h * BLOCK_WIDTH) * 0.5f, 
-	w * BLOCK_WIDTH, w * BLOCK_WIDTH)
-{
-
-	this->w = w;
-	this->h = h;
-	for (auto i : entrance) i = { 0 };
-	for (auto i : exit) i = { 0 };
-	clear();
-}
-
-Maze::~Maze(){
-	delete rect;
-}
 
 void Maze::clear(){
 	for (auto i = 0; i < w; i++)
@@ -78,10 +62,18 @@ POINT Maze::createGate(int count){
 	return ret;
 }
 
-void Maze::create(int strategy, int pathNum)
+bool Maze::create(int W, int H, int strategy, int pathNum, ItemWithPic* bg)
 {
-	if (w <= 0 || h <= 0) return;
-
+	if (W <= 0 || H <= 0 || W >= MAX_MAZE_LEN || H >= MAX_MAZE_LEN) return false;
+	w = W;
+	h = H;
+	*rect = {
+		(int)((bg->rect->w - w * BLOCK_WIDTH) * 0.5f),
+		(int)((bg->rect->h - h * BLOCK_WIDTH) * 0.5f),
+		w * BLOCK_WIDTH, 
+		w * BLOCK_WIDTH
+	};
+	clear();
 	if (strategy == CREATE_STRATEGY_DEFAULT) {//ÂÒ»­µÄ
 		for (auto i = 0; i < w; i++) {
 			matrix[i][0] = true;
@@ -162,4 +154,5 @@ void Maze::create(int strategy, int pathNum)
 			}		
 		}
  	}
+	return true;
 }

@@ -88,3 +88,6 @@ int randEx(int x, int y)
 	return rand()%y + x;
 }
 
+int isInArea(POINT p, SDL_Rect r) {
+	return p.x > r.x && p.x < r.x + r.w - 1 && p.y > r.y && p.y < r.y + r.h;
+}

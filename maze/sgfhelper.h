@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <tchar.h>
+#include <SDL.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -28,6 +29,8 @@ typedef struct SDL_RWops SDL_RWops;
 int GBKToUTF8(const char* gbk, int gbklen, char* utf8, int utf8len);
 //生成随机数
 int randEx(int x, int y);
+
+int isInArea(POINT, SDL_Rect);
 #ifdef __cplusplus
 }
 #endif

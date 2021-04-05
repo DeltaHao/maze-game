@@ -14,6 +14,8 @@ public:
 	TTF_Font* pDebugFont;						//调试字体
 	TTF_Font* pMemuFont;						//菜单字体
 	int frames;									//经过的帧数
+	int level;									//关卡号
+	bool isClearance = false;					//是否通关
 
 	POINT mousePos;								//当前鼠标位置
 	POINT PreMousePos;							//之前鼠标位置
@@ -21,6 +23,7 @@ public:
 	SDL_Rect menuArea;							//菜单区域
 	ItemWithPic* menuBG;						//菜单背景
 	StatusBar* statusBar;						//菜单状态栏
+	ItemWithPic* button0;						//“下一关”按钮
 
 	SDL_Rect displayArea;						//显示区域
 	ItemWithPic* backGround;					//背景
@@ -36,8 +39,8 @@ public:
 	virtual void render(SDL_Window*, SDL_Renderer*);//渲染游戏画面
 	virtual ~Game();
 
-
 	bool createBuffer();//创建内存缓冲区
 	void destroyBuffer();//销毁内存缓冲区
 	void renderMiniMap(SDL_Renderer*);//画小地图
+	bool refreshLevel();//刷新关卡
 };
