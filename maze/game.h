@@ -9,10 +9,15 @@
 
 class Game: public GameInterface{
 public:
+	
 	SDL_Surface* bufferSurf;					//缓冲区表面
 	SDL_Renderer* bufferRenderer;				//缓冲区渲染器
+	TTF_Font* debugFont;
+	TTF_Font* infoFont;
+	Mix_Music* music;
+	Mix_Chunk* levelUp;
+	Mix_Chunk* alert;
 	int frames;									//经过的帧数
-	int level;									//关卡号
 	bool isClearance = false;					//是否通关
 	char info[32];
 
@@ -22,7 +27,7 @@ public:
 	SDL_Rect menuArea;							//菜单区域
 	ItemWithPic* menuBG;						//菜单背景
 	StatusBar* statusBar;						//菜单状态栏
-	ItemWithPic* button0;						//“下一关”按钮
+	std::vector<ItemWithPic*> buttons;						//“下一关”按钮
 
 	SDL_Rect displayArea;						//显示区域
 	ItemWithPic* backGround;					//背景
@@ -43,4 +48,5 @@ public:
 	void renderMiniMap(SDL_Renderer*);//画小地图
 	bool refreshLevel();//刷新关卡
 	void showInformation(char* text, SDL_Renderer* renderer);
+	void levelUpCheck();
 };

@@ -11,14 +11,19 @@ bool Game::init() {
 	PreMousePos = { -1 };
 
 	menuArea = { w - MENU_WIDTH, 0, MENU_WIDTH, h };
+	
 	menuBG = new ItemWithPic(menuArea.x, menuArea.y, menuArea.w, menuArea.h);
-	statusBar = new StatusBar(menuArea.x, menuArea.y, menuArea.w, menuArea.w);
-	button0 = new ItemWithPic(
-		menuArea.x,
-		statusBar->rect->y + statusBar->rect->h + 40,
-		menuArea.w,
-		60
-	);
+	statusBar = new StatusBar(menuArea.x, menuArea.y , menuArea.w, menuArea.w * 3/2);
+	for (int i = 0; i < 4; i++) {
+		ItemWithPic* button = new ItemWithPic(
+			menuArea.x,
+			statusBar->rect->y + statusBar->rect->h + 40 + i*100,
+			menuArea.w,
+			60
+		);
+		buttons.push_back(button);
+	}
+	
 
 	displayArea = { 0, 0, w - MENU_WIDTH, h };
 	backGround = new BackGround(0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
@@ -28,6 +33,7 @@ bool Game::init() {
 	view = new View(displayArea.w, displayArea.h, backGround->rect->w, backGround->rect->h);
 
 	refreshLevel();
+
 	return true;
 }
 
@@ -56,9 +62,6 @@ bool Game::loadResource(SDL_Renderer* winRenderer) {
 	surf = IMG_Load("res\\image\\background2.png");
 	texture = SDL_CreateTextureFromSurface(bufferRenderer, surf);
 	backGround->textures.push_back(texture);
-	surf = IMG_Load("res\\image\\background3.png");
-	texture = SDL_CreateTextureFromSurface(bufferRenderer, surf);
-	backGround->textures.push_back(texture);
 
 
 	surf = IMG_Load("res\\image\\player.png");
@@ -79,24 +82,56 @@ bool Game::loadResource(SDL_Renderer* winRenderer) {
 
 	surf = IMG_Load("res\\image\\button0.png");
 	texture = SDL_CreateTextureFromSurface(winRenderer, surf);
-	button0->textures.push_back(texture);
+	buttons[0]->textures.push_back(texture);
 	surf = IMG_Load("res\\image\\button0-hovered.png");
 	texture = SDL_CreateTextureFromSurface(winRenderer, surf);
-	button0->textures.push_back(texture);
+	buttons[0]->textures.push_back(texture);
+
+	surf = IMG_Load("res\\image\\button1.png");
+	texture = SDL_CreateTextureFromSurface(winRenderer, surf);
+	buttons[1]->textures.push_back(texture);
+	surf = IMG_Load("res\\image\\button1-hovered.png");
+	texture = SDL_CreateTextureFromSurface(winRenderer, surf);
+	buttons[1]->textures.push_back(texture);
+	surf = IMG_Load("res\\image\\button1-disabled.png");
+	texture = SDL_CreateTextureFromSurface(winRenderer, surf);
+	buttons[1]->textures.push_back(texture);
+	surf = IMG_Load("res\\image\\button1-disabled-hovered.png");
+	texture = SDL_CreateTextureFromSurface(winRenderer, surf);
+	buttons[1]->textures.push_back(texture);
+
+
 
 	SDL_FreeSurface(surf);
+	
+	
+	
+	//字体
+	debugFont = TTF_OpenFont("res\\fonts\\courbd.ttf", 13);
+	infoFont = TTF_OpenFont("res\\fonts\\SHOWG.TTF", 18);
+	statusBar->font = TTF_OpenFont("res\\fonts\\courbd.ttf", 24);
 
 
-	//创建字体
+	//声音
+	music = Mix_LoadMUS("res\\music\\music.mp3");
+	Mix_PlayMusic(music, -1);
+
+	alert = Mix_LoadWAV("res\\music\\alert.mp3");
+	levelUp = Mix_LoadWAV("res\\music\\levelUp.mp3");
 	
 	
-	
+
 	return true;
 }
 
 bool Game::unloadResource()
 {
-	return false;
+	Mix_FreeChunk(levelUp);
+	Mix_FreeChunk(alert);
+	Mix_FreeMusic(music);
+	TTF_CloseFont(infoFont);
+	TTF_CloseFont(debugFont);
+	return true;
 }
 
 
@@ -120,21 +155,47 @@ void Game::processEvent(SDL_Event* evt){
 				PreMousePos = mousePos;
 
 		}
-		if (isInArea(mousePos, *button0->rect) && isClearance)
-			button0->index = 1;
+		if (isInArea(mousePos, *buttons[0]->rect) && isClearance)
+			buttons[0]->index = 1;
 		else 
-			button0->index = 0;
+			buttons[0]->index = 0;
+
+		if (isInArea(mousePos, *buttons[1]->rect))
+			if (Mix_PausedMusic() == 1) //如果音乐被暂停了
+				buttons[1]->index = 3;
+			else //如果音乐正在播放
+				buttons[1]->index = 1;		
+		else
+			if (Mix_PausedMusic() == 1) //如果音乐被暂停了
+				buttons[1]->index = 2;
+			else //如果音乐正在播放
+				buttons[1]->index = 0;
 	}
 	else if (evt->type == SDL_MOUSEBUTTONDOWN) {
-		if (isInArea(mousePos, *button0->rect)) {
+		if (isInArea(mousePos, *buttons[0]->rect)) {
 			if (isClearance) {
-				level++;
+				statusBar->level++;
 				if (!refreshLevel()) {
 					//TODO:游戏结束;
 				}
 			}
 			else {
+				Mix_PlayChannel(-1, alert, 0);
 				sprintf_s(info, 32, "GET TO THE EXIT!");
+			}
+		}
+		else if (isInArea(mousePos, *buttons[1]->rect)) {
+			//如果音乐被暂停了
+			if (Mix_PausedMusic() == 1){
+				//恢复播放
+				Mix_ResumeMusic();
+				buttons[1]->index = 0;
+			}
+			//如果音乐正在播放
+			else{
+				//暂停音乐
+				Mix_PauseMusic();
+				buttons[1]->index = 2;
 			}
 		}
 	}
@@ -155,11 +216,7 @@ void Game::processEvent(SDL_Event* evt){
 				!maze->matrix[player->x][player->y - 1]) {
 				player->moveUp();
 				statusBar->steps++;
-				for (auto i : maze->exit) 
-					if (player->x == i.x && player->y == i.y) {
-						isClearance = true;
-						sprintf_s(info, 32, "      LEVEL UP!!!");	             
-					}
+				levelUpCheck();
 			}	
 		} 
 		else if (evt->key.keysym.sym == SDLK_a) {
@@ -167,11 +224,7 @@ void Game::processEvent(SDL_Event* evt){
 				!maze->matrix[player->x - 1][player->y]) {
 				player->moveLeft();
 				statusBar->steps++;
-				for (auto i : maze->exit)
-					if (player->x == i.x && player->y == i.y) {
-						isClearance = true;
-						sprintf_s(info, 32, "      LEVEL UP!!!");
-					}
+				levelUpCheck();
 			}	
 		} 
 		else if (evt->key.keysym.sym == SDLK_s) {
@@ -179,11 +232,7 @@ void Game::processEvent(SDL_Event* evt){
 				!maze->matrix[player->x][player->y + 1]) {
 				player->moveDown();
 				statusBar->steps++;
-				for (auto i : maze->exit)
-					if (player->x == i.x && player->y == i.y) {
-						isClearance = true;
-						sprintf_s(info, 32, "      LEVEL UP!!!");
-					}
+				levelUpCheck();
 			}
 				
 		} 
@@ -192,17 +241,13 @@ void Game::processEvent(SDL_Event* evt){
 				!maze->matrix[player->x + 1][player->y]) {
 				player->moveRight();
 				statusBar->steps++;
-				for (auto i : maze->exit)
-					if (player->x == i.x && player->y == i.y) {
-						isClearance = true;
-						sprintf_s(info, 32, "      LEVEL UP!!!");
-					}
+				levelUpCheck();
 			}	
 		}
 		//控制下一关
 		else if (evt->key.keysym.sym == SDLK_RETURN) {
 			if (isClearance) {
-				level++;
+				statusBar->level++;
 				if (!refreshLevel()) {
 					//TODO:游戏结束;
 				}
@@ -257,16 +302,19 @@ void Game::render(SDL_Window*, SDL_Renderer* renderer){
 	menuArea = { displayArea.w, 0, MENU_WIDTH, h };
 	menuBG->rect->x = menuArea.x;
 	statusBar->rect->x = menuArea.x;
-	button0->rect->x = menuArea.x;
+	for(auto i :buttons)
+		i->rect->x = menuArea.x;
 	
 
 	SDL_RenderCopy(renderer, bufferTex, view->rect, &displayArea);
 	SDL_DestroyTexture(bufferTex);
 
 	
+	
 	menuBG->render(renderer);//菜单背景
 	statusBar->render(renderer);
-	button0->render(renderer);
+	for (auto i : buttons)
+		i->render(renderer);
 	renderMiniMap(renderer);//画小地图
 
 	//
@@ -314,8 +362,6 @@ void Game::renderMiniMap(SDL_Renderer* renderer)
 		SDL_SetRenderDrawColor(renderer, 207, 210, 203, 255);
 	else if (backGround->index == 2)
 		SDL_SetRenderDrawColor(renderer, 156, 133, 46, 255);
-	else if (backGround->index == 3)
-		SDL_SetRenderDrawColor(renderer, 80, 136, 56, 255);
 
 	SDL_RenderFillRectF(renderer, &rectBigRec);
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
@@ -364,17 +410,17 @@ void Game::renderMiniMap(SDL_Renderer* renderer)
 
 #ifdef _DEBUG //渲染调试信息
 	//计算文字大小
-	TTF_Font* pDebugFont = TTF_OpenFont("res\\fonts\\courbd.ttf", 13);
+	
 	char text[256] = { 0 };
 	sprintf_s(text, 255, "(%d,%d,%d,%d)", view->rect->x, view->rect->y, view->rect->w, view->rect->h);
 	SDL_Rect dst = { rectBigRec.x, rectBigRec.y, menuArea.w, 21 };
-	int ret = TTF_SizeText(pDebugFont, text, &(dst.w), &(dst.h));
+	int ret = TTF_SizeText(debugFont, text, &(dst.w), &(dst.h));
 	if (ret) {
 		SDL_Log("get text size failed: %s\n", TTF_GetError());
 	}
 	//渲染文字
 	SDL_Color color = { 255, 255, 255, 255 };
-	SDL_Surface* surf = TTF_RenderText_Blended(pDebugFont, text, color);
+	SDL_Surface* surf = TTF_RenderText_Blended(debugFont, text, color);
 	if (surf) {
 		SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surf);
 		if (texture) {
@@ -392,27 +438,38 @@ bool Game::refreshLevel() {
 	frames = 0;
 	isClearance = false;
 	sprintf_s(info, 32, "");
-	int W = 10 + randEx(0, 3) + level * 3;
-	int H = 10 + randEx(0, W/3) + level * 3;
+	int W = 10 + randEx(0, 3) + statusBar->level * 3;
+	int H = 10 + randEx(0, W/3) + statusBar->level * 3;
 	int C = randEx(0, 5);
 	if(!maze->create(W, H, CREATE_STRATEGY_DFS, C, backGround))
 		return false;
 	player->adjustPos(maze);
-	backGround->index = randEx(0, 4);
+	backGround->index = randEx(0, 3);
+
+	return true;
 }
 
 void Game::showInformation(char* text, SDL_Renderer* renderer){
 	//显示文字
-	TTF_Font* pInfoFont = TTF_OpenFont("res\\fonts\\SHOWG.TTF", 18);
-	SDL_Rect dst1 = { menuArea.x, button0->rect->y - 30, menuArea.w, 21 };
-	TTF_SizeText(pInfoFont, text, &(dst1.w), &(dst1.h));
+	SDL_Rect dst1 = { menuArea.x, buttons[0]->rect->y + 70, menuArea.w, 21 };
+	TTF_SizeText(infoFont, text, &(dst1.w), &(dst1.h));
 
 	SDL_Color color = { 255, 50, 50, 255 };
-	SDL_Surface* surf = TTF_RenderText_Blended(pInfoFont, text, color);
+	SDL_Surface* surf = TTF_RenderText_Blended(infoFont, text, color);
 	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surf);
 	if (texture) {
 		SDL_RenderCopy(renderer, texture, NULL, &dst1);
 		SDL_DestroyTexture(texture);
 	}
 	SDL_FreeSurface(surf);
+}
+
+void Game::levelUpCheck()
+{
+	for (auto i : maze->exit)
+		if (player->x == i.x && player->y == i.y) {
+			isClearance = true;
+			sprintf_s(info, 32, "      LEVEL UP!!!");
+			Mix_PlayChannel(-1, levelUp, 0);
+		}
 }

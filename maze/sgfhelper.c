@@ -1,5 +1,5 @@
 #include "sgfhelper.h"
-#include "SDL.h"
+#include "SDL_mixer.h"
 
 /*********************************************************************************
  *									±àÂë×ª»»
@@ -91,3 +91,5 @@ int randEx(int x, int y)
 int isInArea(POINT p, SDL_Rect r) {
 	return p.x > r.x && p.x < r.x + r.w - 1 && p.y > r.y && p.y < r.y + r.h;
 }
+
+

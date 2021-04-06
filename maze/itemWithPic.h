@@ -25,6 +25,7 @@ public:
 		delete rect;
 	}
 	virtual void render(SDL_Renderer* renderer) {
+		if (textures.empty()) return;
 		SDL_RenderCopy(renderer, textures[index], NULL, rect);
 	}
 };
@@ -42,10 +43,17 @@ class StatusBar: public ItemWithPic {
 public:
 	int steps;
 	int seconds;
+	int level;
+	TTF_Font* font;
 	StatusBar(float x, float y, int w, int h) :ItemWithPic(x, y, w, h) {
 		steps = 0;
 		seconds = 0;
+		level = 0;
+		font = NULL;
 	};
+	~StatusBar() {
+		TTF_CloseFont(font);
+	}
 	//жиди
 	virtual void render(SDL_Renderer* renderer);
 };

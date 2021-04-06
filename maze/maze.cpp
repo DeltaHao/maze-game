@@ -66,7 +66,9 @@ POINT Maze::createGate(int count){
 
 bool Maze::create(int W, int H, int strategy, int pathNum, ItemWithPic* bg)
 {
+	
 	if (W <= 0 || H <= 0 || W >= MAX_MAZE_LEN || H >= MAX_MAZE_LEN) return false;
+	clear();
 	w = W;
 	h = H;
 	*rect = {
@@ -75,7 +77,7 @@ bool Maze::create(int W, int H, int strategy, int pathNum, ItemWithPic* bg)
 		w * BLOCK_WIDTH, 
 		w * BLOCK_WIDTH
 	};
-	clear();
+	
 	if (strategy == CREATE_STRATEGY_DEFAULT) {//ÂÒ»­µÄ
 		for (auto i = 0; i < w; i++) {
 			matrix[i][0] = true;
