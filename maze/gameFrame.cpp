@@ -62,7 +62,7 @@ bool GameFrame::init()
 		return false;
 	}
 	//…Ë÷√Õº±Í
-	SDL_Surface* iconSurface = IMG_Load("res\\ico\\favicon.ico");
+	SDL_Surface* iconSurface = IMG_Load("res\\ico\\icon.ico");
 	if (iconSurface) {
 		SDL_SetWindowIcon(pWin, iconSurface);
 		SDL_FreeSurface(iconSurface);

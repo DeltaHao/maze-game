@@ -25,6 +25,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="maze.cpp" />
     <ClCompile Include="sgfhelper.c" />
+    <ClCompile Include="stringInput.cpp" />
     <ClCompile Include="view.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -34,6 +35,7 @@
     <ClInclude Include="itemWithPic.h" />
     <ClInclude Include="maze.h" />
     <ClInclude Include="sgfhelper.h" />
+    <ClInclude Include="stringInput.h" />
     <ClInclude Include="view.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

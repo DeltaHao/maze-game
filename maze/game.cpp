@@ -11,7 +11,6 @@ bool Game::init() {
 	PreMousePos = { -1 };
 
 	menuArea = { w - MENU_WIDTH, 0, MENU_WIDTH, h };
-	
 	menuBG = new ItemWithPic(menuArea.x, menuArea.y, menuArea.w, menuArea.h);
 	statusBar = new StatusBar(menuArea.x, menuArea.y , menuArea.w, menuArea.w * 3/2);
 	for (int i = 0; i < 4; i++) {
@@ -26,6 +25,7 @@ bool Game::init() {
 	
 
 	displayArea = { 0, 0, w - MENU_WIDTH, h };
+	stringInput = new StringInput(10, h - 100, displayArea.w - 20, 30);
 	backGround = new BackGround(0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT);
 	maze = new Maze();
 	player = new Player();
@@ -110,7 +110,7 @@ bool Game::loadResource(SDL_Renderer* winRenderer) {
 	debugFont = TTF_OpenFont("res\\fonts\\courbd.ttf", 13);
 	infoFont = TTF_OpenFont("res\\fonts\\SHOWG.TTF", 18);
 	statusBar->font = TTF_OpenFont("res\\fonts\\courbd.ttf", 24);
-
+	stringInput->font = TTF_OpenFont("res\\fonts\\courbd.ttf", 25);
 
 	//声音
 	music = Mix_LoadMUS("res\\music\\music.mp3");
@@ -200,18 +200,17 @@ void Game::processEvent(SDL_Event* evt){
 		}
 	}
 	else if (evt->type == SDL_KEYDOWN) {
-		//控制画面移动
-		if (evt->key.keysym.sym == SDLK_UP && view->rect->y > 0) 
-			view->moveY(-10);
-		else if (evt->key.keysym.sym == SDLK_DOWN && view->rect->y < backGround->rect->h - view->rect->h)
-			view->moveY(10);
-		else if (evt->key.keysym.sym == SDLK_RIGHT && view->rect->x < backGround->rect->w - view->rect->w)
-			view->moveX(10);
-		else if (evt->key.keysym.sym == SDLK_LEFT && view->rect->x > 0)
-			view->moveX(-10);
-
+		if (evt->key.keysym.sym == SDLK_BACKQUOTE) {
+			stringInput->show = !stringInput->show;
+		}
+		if (stringInput->show) {
+			handleSpell(stringInput->handleInput(evt));
+			
+			//TODO::其他秘籍
+			return;
+		}
 		//控制人物移动
-		else if (evt->key.keysym.sym == SDLK_w) {
+		if (evt->key.keysym.sym == SDLK_w || evt->key.keysym.sym == SDLK_UP) {
 			if (player->x < 0 || player->y <= 0 || //防越界
 				!maze->matrix[player->x][player->y - 1]) {
 				player->moveUp();
@@ -219,7 +218,7 @@ void Game::processEvent(SDL_Event* evt){
 				levelUpCheck();
 			}	
 		} 
-		else if (evt->key.keysym.sym == SDLK_a) {
+		else if (evt->key.keysym.sym == SDLK_a || evt->key.keysym.sym == SDLK_LEFT) {
 			if (player->x <= 0 || player->y < 0 ||
 				!maze->matrix[player->x - 1][player->y]) {
 				player->moveLeft();
@@ -227,7 +226,7 @@ void Game::processEvent(SDL_Event* evt){
 				levelUpCheck();
 			}	
 		} 
-		else if (evt->key.keysym.sym == SDLK_s) {
+		else if (evt->key.keysym.sym == SDLK_s || evt->key.keysym.sym == SDLK_DOWN) {
 			if (player->x < 0 || player->y < -1 ||
 				!maze->matrix[player->x][player->y + 1]) {
 				player->moveDown();
@@ -236,7 +235,7 @@ void Game::processEvent(SDL_Event* evt){
 			}
 				
 		} 
-		else if (evt->key.keysym.sym == SDLK_d) {
+		else if (evt->key.keysym.sym == SDLK_d || evt->key.keysym.sym == SDLK_RIGHT) {
 			if (player->x < -1 || player->y < 0 ||
 				!maze->matrix[player->x + 1][player->y]) {
 				player->moveRight();
@@ -244,16 +243,6 @@ void Game::processEvent(SDL_Event* evt){
 				levelUpCheck();
 			}	
 		}
-		//控制下一关
-		else if (evt->key.keysym.sym == SDLK_RETURN) {
-			if (isClearance) {
-				statusBar->level++;
-				if (!refreshLevel()) {
-					//TODO:游戏结束;
-				}
-			}
-		}
-
 	}
 	
 	else if (evt->type == SDL_MOUSEWHEEL) {
@@ -299,6 +288,7 @@ void Game::render(SDL_Window*, SDL_Renderer* renderer){
 
 	//缓冲区映射到窗口
 	displayArea = { 0, 0, w - MENU_WIDTH, h };
+	stringInput->rect->w = displayArea.w - 20;
 	menuArea = { displayArea.w, 0, MENU_WIDTH, h };
 	menuBG->rect->x = menuArea.x;
 	statusBar->rect->x = menuArea.x;
@@ -316,8 +306,9 @@ void Game::render(SDL_Window*, SDL_Renderer* renderer){
 	for (auto i : buttons)
 		i->render(renderer);
 	renderMiniMap(renderer);//画小地图
-
-	//
+	if(stringInput->show)
+		stringInput->render(renderer);
+	
 	showInformation(info, renderer);	
 }
 
@@ -354,7 +345,8 @@ void Game::renderMiniMap(SDL_Renderer* renderer)
 		menuArea.x, 
 		h - menuArea.w * backGround->rect->h / backGround->rect->w,
 		menuArea.w,
-		(menuArea.w) * backGround->rect->h / backGround->rect->w };
+		(menuArea.w) * backGround->rect->h / backGround->rect->w 
+	};
 
 	if(backGround->index == 0)
 		SDL_SetRenderDrawColor(renderer, 140, 95, 62, 255);
@@ -462,6 +454,12 @@ void Game::showInformation(char* text, SDL_Renderer* renderer){
 		SDL_DestroyTexture(texture);
 	}
 	SDL_FreeSurface(surf);
+}
+
+void Game::handleSpell(std::string spell){
+	if (spell == "rebuild") {
+		refreshLevel();
+	}
 }
 
 void Game::levelUpCheck()

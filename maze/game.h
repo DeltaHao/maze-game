@@ -2,6 +2,7 @@
 #include"view.h"
 #include"itemWithPic.h"
 #include"maze.h"
+#include"stringInput.h"
 
 #define DISPLAY_WIDTH 800
 #define MENU_WIDTH 150
@@ -19,7 +20,7 @@ public:
 	Mix_Chunk* alert;
 	int frames;									//经过的帧数
 	bool isClearance = false;					//是否通关
-	char info[32];
+	char info[32];								//提示信息
 
 	POINT mousePos;								//当前鼠标位置
 	POINT PreMousePos;							//之前鼠标位置
@@ -27,7 +28,8 @@ public:
 	SDL_Rect menuArea;							//菜单区域
 	ItemWithPic* menuBG;						//菜单背景
 	StatusBar* statusBar;						//菜单状态栏
-	std::vector<ItemWithPic*> buttons;						//“下一关”按钮
+	std::vector<ItemWithPic*> buttons;			//按钮
+	StringInput* stringInput;					//输入框
 
 	SDL_Rect displayArea;						//显示区域
 	ItemWithPic* backGround;					//背景
@@ -49,4 +51,5 @@ public:
 	bool refreshLevel();//刷新关卡
 	void showInformation(char* text, SDL_Renderer* renderer);
 	void levelUpCheck();
+	void handleSpell(std::string);
 };
